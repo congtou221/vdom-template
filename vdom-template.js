@@ -1,0 +1,1 @@
+window.vt = require('./index.js');

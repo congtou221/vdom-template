@@ -1,0 +1,1 @@
+exports.t2h = require('./lib/virtual-template.js');

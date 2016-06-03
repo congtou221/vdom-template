@@ -1,0 +1,17 @@
+<!DOCTYPE>
+<html>
+<head>
+	<title>test virtual-dom-template</title>
+</head>
+<body>
+	<div id="container"></div>
+	<script type="template" id="template-id">
+		<%for(var i = 0 ; i < data.length; i++){
+			var item = data[i];%>
+			<li>This is <%item.name%>, <%item.age%> years old.</li>
+		<%}%>
+	</script>
+	<script src='../dist/compile.js'></script>
+	<script src='./demo.js'></script>
+</body>
+</html>

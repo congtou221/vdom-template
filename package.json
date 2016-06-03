@@ -1,0 +1,28 @@
+{
+  "name": "vdom-template",
+  "version": "1.0.0",
+  "description": "a js template engine with virtual dom",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/congtou221/vdom-template.git"
+  },
+  "keywords": [
+    "virtual",
+    "dom",
+    "template"
+  ],
+  "author": "sixiaohui",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/congtou221/vdom-template/issues"
+  },
+  "homepage": "https://github.com/congtou221/vdom-template#readme",
+  "dependencies": {
+    "s-virtual-dom": "^1.0.0",
+    "mini-template": "^1.0.0"
+  }
+}
