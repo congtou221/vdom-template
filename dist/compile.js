@@ -11,6 +11,11 @@ _.extend = function(dest, src){
 	}
 	return dest;
 }
+_.each = function(arr, fn){
+	for(var i = 0 , len = arr.length ; i < len; i++){
+		fn(arr[i], i);
+	}
+}
 
 module.exports = _;
 },{}],3:[function(require,module,exports){
@@ -18,16 +23,90 @@ var svd = require('s-virtual-dom');
 var tmp = require('mini-template');
 var _ = require('./util');
 
-function initDom(){
-	this.container.innerHTML = tmp(this.tpl, this.data);
+function render(){
+	// var htmlStr = tmp(this.tpl, this.data);
+
+	var htmlNode = t2h(this.tpl, this.container);
+
+	this.virtualDom = h2v(htmlNode);
 }
 function setState(data){
 	_.extend(this.data, data);
 
+	// var newHtmlStr = tmp(this.tpl, this.data);
+
+	var newHtmlNode = t2h(this.tpl, this.container);
+
+	var newVirtualDom = h2v(newHtmlNode);
+
+	vDiff(this.virtualDom, newVirtualDom);
+
 }
-function vDiff(){
-	var htmlStr = tmp(this.tpl, this.data);
-	console.log(typeof htmlStr);
+
+function t2h(tpl, root){
+	var str = tmp(tpl, this.data);
+
+	root.innerHTML = str;
+	return root.children;
+}
+function h2v(htmlNode){
+	var root = document.createElement('div');
+
+	if(htmlNode.length === 1){
+		var root = htmlNode[0]; 
+	}else{
+		var root = root;
+	}
+
+	return toVirtualDom(root);
+
+
+}
+function toVirtualDom(node){
+	var el = svd.el;
+	var tagName = node.tagName.toLowerCase();
+	var props = setPropObj(node.attributes);		
+
+	var virtualChildArr = [];
+	_.each(node.childNodes, function(child){
+		if(child.nodeType === 3){
+			// why
+			if(child.nodeValue){
+				var virtualChild = child.nodeValue;
+			}else{
+				var virtualChild = child.textContent;
+			}
+			// var virtualChild = node.nodeValue ?
+			// 					node.nodeValue :
+			// 					node.textContent;
+			
+		}else{
+			var virtualChild = toVirtualDom(child);
+		}
+		
+		virtualChildArr.push(virtualChild);
+	})
+	var children = virtualChildArr;
+	
+	return new el(tagName, props, children);
+}
+function setPropObj(attrArr){
+	var attrObj = {};
+	_.each(attrArr, function(attr, i){
+		var attrName = attr.name;
+		var attrValue = attr.value;
+		attrObj[attrName] = attrValue;
+	})
+	return attrObj;
+}
+function vDiff(virtualDom, newVirtualDom){
+	var diff = svd.diff;
+	var patch = svd.patch;
+
+
+	var patches = diff(virtualDom, newVirtualDom);
+	patch(this.container, patches);
+
 }
 function makeVirTemplateClass(){
 	function virTemplateClass(tpl, container, data){
@@ -37,7 +116,7 @@ function makeVirTemplateClass(){
 	
 	}
 	_.extend(virTemplateClass.prototype, {
-		initDom: initDom,
+		render: render,
 		setState: setState
 	});	
 
@@ -51,6 +130,8 @@ module.exports = function(tpl, container, data){
 			new virTemplate(tpl, container, data) :
 			virTemplate;
 }
+
+
 },{"./util":2,"mini-template":4,"s-virtual-dom":5}],4:[function(require,module,exports){
 
 var tplEngine = function(tpl, data){
@@ -91,7 +172,6 @@ var tplEngine = function(tpl, data){
 
 	return htmlStr;
 };
-
 module.exports = tplEngine;
 },{}],5:[function(require,module,exports){
 exports.el = require('./lib/element');

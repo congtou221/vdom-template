@@ -1,14 +1,16 @@
-<!DOCTYPE>
+<!DOCTYPE html>
 <html>
 <head>
 	<title>test virtual-dom-template</title>
+	<meta charset="UTF-8">
 </head>
 <body>
 	<div id="container"></div>
 	<script type="template" id="template-id">
-		<%for(var i = 0 ; i < data.length; i++){
-			var item = data[i];%>
-			<li>This is <%item.name%>, <%item.age%> years old.</li>
+		<p>This is <%data.name%>, I am a <%data.age%> years old <%data.sex%>, and I am from <%data.home%>.</p>
+		<%for(var i = 0 ; i < data.tags.length; i++){
+			var item = data.tags[i];%>
+			<li><%item%></li>
 		<%}%>
 	</script>
 	<script src='../dist/compile.js'></script>
