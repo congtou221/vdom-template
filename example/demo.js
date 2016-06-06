@@ -13,16 +13,17 @@ var container = document.getElementById("container");
 
 var virTemplate = t2h(tpl, container, data);
 
-virTemplate.render();
+virTemplate.init();
 
-var count = 10;
-var cancel = setInterval(function(){
-	while(count === 0){
-		clearInterval(cancel);
-	}
-	count--;
+// var count = 10;
+// var cancel = setInterval(function(){
+// 	while(count === 0){
+// 		clearInterval(cancel);
+// 	}
+// 	count--;
 
-	var data = virTemplate.data.tags.push(Math.random());
+	// var data = virTemplate.data.tags.push(Math.random());
+	var data = {'tags':[]};
 	virTemplate.setState(data);
-}, 1000);
+// }, 1000);
 
