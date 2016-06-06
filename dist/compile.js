@@ -25,64 +25,48 @@ var _ = require('./util');
 
 function init(){
 	// init view
-	var htmlStr = t2s(this.tpl);
+	var htmlStr = t2s();
 	var htmlNode = s2h(htmlStr);
 
 	// save virtualDom
-	this.virtualDom = h2v(htmlNode, htmlStr);
+	this.virtualDom = h2v(htmlNode);
 
 }
 function setState(data){
 	_.extend(this.data, data);
 
-	var newHtmlStr = t2s(this.tpl);
+	var newHtmlStr = t2s();
 
 	var newHtmlNode = s2h(newHtmlStr, true);
 
-	var newVirtualDom = h2v(newHtmlNode, newHtmlStr);
+	var newVirtualDom = h2v(newHtmlNode);
 
 	vDiff(this.virtualDom, newVirtualDom);
+
+	this.virtualDom = newVirtualDom;
 
 }
 
 // conver template to string
-function t2s(tpl){
-	return tmp(tpl, this.data);
+function t2s(){
+	return tmp(this.tpl, this.data);
 }	
 // convert string to htmlNode
 function s2h(str, isUpdate){
+	var tempContainer = document.createElement('div');
+	tempContainer.setAttribute('id','container');
 
 	var root = isUpdate ?
-				document.createElement('div') :
+				tempContainer :
 				this.container;
-	
-
 
 	root.innerHTML = str;
 
-	return root.children;
+	return root;
 }
 
-// convert htmlNode to vritualDom
-function h2v(htmlNode, htmlStr){
-
-	// firstly, choose a root node
-	var root = document.createElement('div');
-	root.innerHTML = htmlStr;
-
-	if(htmlNode.length === 1){
-		var root = htmlNode[0]; 
-	}else{
-		var root = root;
-	}
-
-	// secondly, convert the next
-	return toVirtualDom(root);
-
-
-}
-
-function toVirtualDom(node){
+// convert htmlNode to virtualDom
+function h2v(node){
 	var el = svd.el;
 	var tagName = node.tagName.toLowerCase();
 	var props = setPropObj(node.attributes);		
@@ -98,7 +82,7 @@ function toVirtualDom(node){
 			}
 			
 		}else{
-			var virtualChild = toVirtualDom(child);
+			var virtualChild = h2v(child);
 		}
 		
 		virtualChildArr.push(virtualChild);
@@ -193,6 +177,7 @@ var tplEngine = function(tpl, data){
 
 	return htmlStr;
 };
+
 module.exports = tplEngine;
 },{}],5:[function(require,module,exports){
 exports.el = require('./lib/element');
@@ -225,6 +210,7 @@ var dfsWalk = function(oldNode, newNode, index, patches){
 	}else if(_.isString(oldNode) && _.isString(newNode)){
 		// update text node
 		currentPatches.push({type: 'TEXT', content: newNode});
+		patches[index] = currentPatches;
 	}else if(oldNode.tagName === newNode.tagName && oldNode.key === newNode.key){
 		// update props
 
@@ -241,12 +227,15 @@ var dfsWalk = function(oldNode, newNode, index, patches){
 				currentPatches,
 				patches
 				);
+		}else{
+			patches[index] = currentPatches;
 		}
 	}else{
 		// replace oldNode
 		currentPatches.push({type: 'REPLACE', content: newNode});
+		patches[index] = currentPatches;
 	}
-	patches[index] = currentPatches;
+	
 
 };
 
@@ -258,6 +247,7 @@ var diffChildren = function(oldChildren, newChildren, index, currentPatches, pat
 	if(diffs.moves.length){
 		var reorderPatch = {type: 'REORDER', moves: diffs.moves};
 		currentPatches.push(reorderPatch);
+		patches[index] = currentPatches;
 	}
 
 	var leftNode = null;
@@ -380,7 +370,7 @@ function patch(root, patches){
 var patchWalk = function(node, walker, patches){
 	var currentPatch = patches[walker.index];
 
-	var len = node.children ? node.children.length : 0;
+	var len = node.childNodes ? node.childNodes.length : 0;
 
 	for(var i = 0 ; i < len ; i++){
 		var child = node.childNodes[i];
@@ -466,8 +456,8 @@ var reorderChildren = function(node, moves){
 								(typeof move.item === 'object') ?
 								move.item.render() :
 								document.createTextNode(move.item);
-			staticNodeList.splice(index, 0, insertNode);
-			node.insertBefore(insertNode, node.childNodes[index]||null);
+			staticNodeList.splice(index, 0, insertItem);
+			node.insertBefore(insertItem, node.childNodes[index]||null);
 
 		}
 	});
@@ -496,7 +486,15 @@ _.each = function(array, fn){
 };
 
 _.toArray = function(listLike){
+	if(!listLike){
+		return [];
+	}
 
+	var list = [];
+	for(var i = 0 , len = listLike.length; i < len ; i++){
+		list.push(listLike[i]);
+	}
+	return list;
 };
 
 _.setAttr = function(node, key, value){

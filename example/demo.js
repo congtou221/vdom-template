@@ -5,7 +5,7 @@ var data = {
 			'age': 21,
 			'sex': 'girl', 
 			'home': 'Beijing',
-			'tags':['文艺','美术爱好者','内敛','务实','进取心','吃货','修炼中']
+			'tags':['文艺','美术爱好者','内敛','务实','进取','吃货','修炼中']
 			};
 var tpl = document.getElementById("template-id").innerHTML;	
 
@@ -15,15 +15,18 @@ var virTemplate = t2h(tpl, container, data);
 
 virTemplate.init();
 
-// var count = 10;
-// var cancel = setInterval(function(){
-// 	while(count === 0){
-// 		clearInterval(cancel);
-// 	}
-// 	count--;
+var count = 0;
+var cancle = setInterval(function(){
 
-	// var data = virTemplate.data.tags.push(Math.random());
-	var data = {'tags':[]};
-	virTemplate.setState(data);
-// }, 1000);
+	if(count > 3){
+		clearTimeout(cancle);
+	}
+	var random = Math.random();
+	virTemplate.data.tags[virTemplate.data.tags.length] = random;
+
+	virTemplate.setState(virTemplate.data);
+
+	count++;
+},1000)
+
 
